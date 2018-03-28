@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="Wxdc">  
+
+ <resultMap id="BaseResultMap" type="com.jst.wxdc.bean.WxdcDto" >
+    <result column="id" property="id" jdbcType="VARCHAR" />
+    <result column="open_id" property="openId" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="pay_type" property="payType" jdbcType="VARCHAR" />
+    <result column="pay_status" property="payStatus" jdbcType="INTEGER" />
+    <result column="print_status" property="printStatus" jdbcType="INTEGER" />
+    <result column="mark" property="mark" jdbcType="VARCHAR" />
+    <result column="send_status" property="sendStatus" jdbcType="INTEGER" />
+    <result column="food_amount" property="foodAmount" jdbcType="INTEGER" />
+    <result column="send_amount" property="sendAmount" jdbcType="INTEGER" />
+    <result column="addr_id" property="addrId" jdbcType="VARCHAR" />
+    <result column="addr" property="addr" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="sex" property="sex" jdbcType="INTEGER" />
+    <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id,open_id,create_time,pay_type,pay_status,print_status,mark,send_status,food_amount,send_amount,addr_id,
+    addr,name,sex,mobile
+  </sql>
+	
+  <select id="selectOrder" parameterType="com.jst.wxdc.bean.WxdcDto"  resultMap="BaseResultMap" >
+     select * from (select 
+    ord.id,ord.open_id,ord.pay_type,ord.print_status,ord.mark,ord.send_status,ord.food_amount+ord.send_amount food_amount,ord.send_amount,ord.addr_id,
+    ad.addr,ad.name,ad.sex,ad.mobile,
+    (case when ord.pay_status = 0 and TIMESTAMPDIFF(second,ord.create_time,now()) > 15*60
+    then 2 else ord.pay_status end)   pay_status,
+    DATE_FORMAT(ord.create_time,'%Y-%m-%d %H:%i:%s') create_time
+    from t_order ord , t_addr ad
+    where ord.addr_id = ad.id ) tt 
+    <where>
+            <if test="id != null and id !=''">
+				and tt.id like CONCAT('%',#{id},'%')
+			</if>
+			<if test="mobile != null and mobile !=''">
+				and tt.mobile like CONCAT('%',#{mobile},'%')
+			</if>
+			<if test="payType != null and payType !=''">
+				and tt.pay_type = #{payType}
+			</if>
+			<if test="payStatus != null and payStatus !=''">
+				and tt.pay_status = #{payStatus}
+			</if>
+			<if test="printStatus != null and printStatus !=''">
+				and tt.print_status = #{printStatus}
+			</if>
+			<if test="sendStatus != null and sendStatus !=''">
+				and tt.send_status = #{sendStatus}
+			</if>
+			<if test="name != null and name !=''">
+				and tt.name like CONCAT('%',#{name},'%')
+			</if>
+		    <if test="startTimes != null and startTimes !=''">
+				and tt.create_time &gt;= #{startTimes}
+			</if>
+			<if test="endTimes != null and endTimes != ''">
+				and tt.create_time &lt;= #{endTimes}
+			</if>
+	</where>
+    order by  tt.create_time  desc
+  </select>
+   <update id="updateOrderStatus" parameterType="com.jst.wxdc.bean.WxdcDto"  >
+   update t_order  
+      set  send_status = "2"
+   where id = #{id}
+  </update>  
+  <select id="selectOrderDetail" parameterType="com.jst.wxdc.bean.WxdcDto"  resultMap="BaseResultMap" >
+    select 
+    ord.id,ord.open_id,ord.pay_type,ord.pay_status,ord.print_status,ord.mark,ord.send_status,ord.food_amount,ord.send_amount,ord.addr_id,
+    ad.addr,ad.name,ad.sex,ad.mobile,
+    DATE_FORMAT(ord.create_time,'%Y-%m-%d %H:%i:%s') create_time
+    from t_order ord , t_addr ad
+    where ord.id = #{id} and ord.addr_id = ad.id 
+			
+  </select>
+ <resultMap id="FoodResultMap" type="com.jst.wxdc.bean.Food" >
+    <result column="food_id" property="foodId" jdbcType="VARCHAR" />
+    <result column="type_id" property="typeId" jdbcType="VARCHAR" />
+    <result column="food_name" property="foodName" jdbcType="VARCHAR" />
+    <result column="pic_path" property="picPath" jdbcType="VARCHAR" />
+    <result column="order_id" property="orderId" jdbcType="INTEGER" />
+    <result column="price" property="price" jdbcType="INTEGER" />
+    <result column="num" property="num" jdbcType="INTEGER" />
+    <result column="price_total" property="priceTotal" jdbcType="INTEGER" />
+    <result column="sale_price" property="salePrice" jdbcType="INTEGER" />
+    <result column="old_price" property="oldPrice" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="spice_level" property="spiceLevel" jdbcType="INTEGER" />
+    <result column="mark" property="mark" jdbcType="VARCHAR" />
+    <result column="commend_mark" property="commendMark" jdbcType="VARCHAR" />
+    <result column="type_name" property="typeName" jdbcType="VARCHAR" />
+    <result column="latest_update_time" property="latestUpdateTime" jdbcType="TIMESTAMP" />
+    
+  </resultMap>  
+  <select id="selectFoodDetail" parameterType="com.jst.wxdc.bean.Food"  resultMap="FoodResultMap" >
+    select 
+    f.food_name,f.pic_path,ord.price,ord.num,ord.price*ord.num price_total
+    from t_order_detail ord , t_food f
+    where ord.order_id = #{orderId} and ord.food_id = f.food_id 
+			
+  </select>
+  
+  <update id="updateAll" parameterType="java.lang.String"  >
+   update user set name='test_update'
+  </update>
+ <resultMap id="SysParamsResultMap" type="com.jst.wxdc.bean.SysParams" >
+    <result column="id" property="id" jdbcType="VARCHAR" />
+    <result column="order_cill_amount" property="orderCillAmount" jdbcType="INTEGER" />
+    <result column="send_amount" property="sendAmount" jdbcType="INTEGER" />
+    <result column="order_free_amount" property="orderFreeAmount" jdbcType="INTEGER" />
+  </resultMap> 
+  <update id="updateSendMoney" parameterType="com.jst.wxdc.bean.SysParams"  >
+   update t_sys_params set order_cill_amount=#{orderCillAmount},send_amount=#{sendAmount},order_free_amount=#{orderFreeAmount}
+   where id = "1"
+  </update>
+    <select id="selectSendMoney" parameterType="com.jst.wxdc.bean.SysParams"  resultMap="SysParamsResultMap" >
+    select 
+    id,order_cill_amount,send_amount,order_free_amount
+    from t_sys_params 
+  </select> 
+    <insert id="insertSendMoney" parameterType="com.jst.wxdc.bean.SysParams" >
+    insert into t_sys_params (id,order_cill_amount,send_amount,order_free_amount)   
+       values  
+        (1,#{orderCillAmount},#{sendAmount},#{orderFreeAmount})
+  </insert> 
+ <resultMap id="FoodTypeResultMap" type="com.jst.wxdc.bean.FoodType" >
+    <result column="type_id" property="typeId" jdbcType="VARCHAR" />
+    <result column="type_name" property="typeName" jdbcType="VARCHAR" />
+    <result column="type_index" property="typeIndex" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="mark" property="mark" jdbcType="VARCHAR" />
+  </resultMap> 
+  <select id="selectFoodType" parameterType="com.jst.wxdc.bean.FoodType"  resultMap="FoodTypeResultMap" >
+    select 
+    type_id,type_name,type_index,status,mark
+    from t_food_type
+    where
+				status != "2"
+            <if test="typeName != null and typeName !=''">
+				and type_name like CONCAT('%',#{typeName},'%')
+			</if>
+			<if test=" status != null and status !=''">
+				and status = #{status}
+			</if>
+			<if test=" typeId != null and typeId !=''">
+				and type_id = #{typeId}
+			</if>
+			<if test="queryType =='0'">
+				and status = "1"
+			</if>
+    order by case when ifnull(type_index,'')='' then 0 else 1 end desc, type_index asc
+  </select> 
+  <select id="selectFoodTypeById" parameterType="com.jst.wxdc.bean.FoodType"  resultMap="FoodTypeResultMap" >
+    select 
+    *
+    from t_food_type
+    where type_id = #{typeId}
+  </select>
+	 <insert id="insertFoodType"  parameterType="com.jst.wxdc.bean.FoodType">  
+    
+      insert into t_food_type (type_id,type_name,type_index,status,mark,latest_update_time,create_time)   
+       values  
+        (#{typeId},#{typeName},#{typeIndex},#{status},#{mark},#{latestUpdateTime},#{createTime})  
+    </insert> 
+  <select id="selectTypeIndex" parameterType="com.jst.wxdc.bean.FoodType"  resultMap="FoodTypeResultMap" >
+    select 
+    type_id,type_name,type_index,status,mark
+    from t_food_type
+    where type_index = #{typeIndex}
+  </select>
+  <update id="updateFoodType" parameterType="com.jst.wxdc.bean.FoodType"  >
+   update t_food_type
+   set
+	          <if test="typeName != null and typeName !='' ">
+	              type_name = #{typeName},
+	          </if>
+	          <if test="status != null and status !='' ">
+	              status = #{status},
+	          </if>
+	          <if test="mark != null and mark !='' ">
+	              mark = #{mark},
+	          </if>
+	          <if test="latestUpdateTime != null and latestUpdateTime !='' ">
+	              latest_update_time = #{latestUpdateTime},
+	          </if>
+	          type_index = #{typeIndex}
+    	 where type_id = #{typeId}
+  </update> 
+  <update id="updateFoodTypeStatus" parameterType="com.jst.wxdc.bean.FoodType"  >
+   UPDATE t_food_type
+	SET STATUS = '2',
+ 	type_index = NULL
+	WHERE
+	type_id = #{typeId}
+  </update> 
+  <select id="selectFoodByTypeId" parameterType="com.jst.wxdc.bean.FoodType"  resultMap="FoodResultMap" >
+    select 
+    food_id
+    from t_food
+    where type_id = #{typeId}
+  </select> 
+  <select id="selectFood" parameterType="com.jst.wxdc.bean.Food"  resultMap="FoodResultMap" >
+    select 
+    fo.food_id,fo.type_id,fo.food_name,fo.pic_path,fo.sale_price,fo.old_price,fo.status,fo.spice_level,fo.mark,fo.commend_mark,ft.type_name
+    from t_food fo,t_food_type ft
+    where
+				fo.status != "0" and fo.type_id = ft.type_id
+            <if test="foodId != null and foodId !=''">
+				and fo.food_id like CONCAT('%',#{foodId},'%')
+			</if>
+			<if test=" status != null and status !=''">
+				and fo.status = #{status}
+			</if>
+			<if test=" typeId != null and typeId !=''">
+				and fo.type_id = #{typeId}
+			</if>
+			<if test=" foodName != null and foodName !=''">
+				and fo.food_name like CONCAT('%',#{foodName},'%')
+			</if>
+    order by  fo.latest_update_time desc
+  </select>
+  <select id="selectFoodId" parameterType="com.jst.wxdc.bean.Food"  resultMap="FoodResultMap" >
+    select 
+    food_id,type_id,food_name,pic_path,sale_price,old_price,status,spice_level,mark
+    from t_food
+    where status != "0" and food_id like CONCAT(#{foodId},'%')
+			
+			
+    order by  food_id  asc
+  </select>
+  <update id="updateFoodStatus" parameterType="com.jst.wxdc.bean.Food"  >
+   update t_food  
+      <set>
+	          <if test="status == null or status =='' ">
+	              status = "0",
+	          </if>
+	          <if test="status == 1 ">
+	              status = "2",
+	          </if>
+	          <if test="status == 2 ">
+	              status = "1"
+	          </if>
+    	 </set>
+   where food_id = #{foodId}
+  </update> 
+	 <insert id="insertFood"  parameterType="com.jst.wxdc.bean.Food">  
+    
+      insert into t_food (food_id,type_id,food_name,pic_path,sale_price,old_price,status,spice_level,mark,commend_mark,latest_update_time,create_time)   
+       values  
+        (#{foodId},#{typeId},#{foodName},#{picPath},#{salePrice},#{oldPrice},#{status},#{spiceLevel},#{mark},#{commendMark},#{latestUpdateTime},#{createTime})  
+    </insert> 
+	 <update id="updateFood"  parameterType="com.jst.wxdc.bean.Food">  
+    update t_food     
+      <set>
+	          <if test="foodName != null and foodName !='' ">
+	              food_name = #{foodName},
+	          </if>
+	          <if test="typeId != null and typeId !='' ">
+	              type_id = #{typeId},
+	          </if>
+	          <if test="picPath != null and picPath !='' ">
+	              pic_path = #{picPath},
+	          </if>
+	          <if test="salePrice != null and salePrice !='' ">
+	              sale_price = #{salePrice},
+	          </if>
+	          <if test="oldPrice != null and oldPrice !='' ">
+	              old_price = #{oldPrice},
+	          </if>
+	          <if test="spiceLevel != null and spiceLevel !='' ">
+	              spice_level = #{spiceLevel},
+	          </if>
+	          <if test="mark != null and mark !='' ">
+	              mark = #{mark},
+	          </if>
+	          <if test="commendMark != null and commendMark !='' ">
+	              commend_mark = #{commendMark},
+	          </if>
+	          <if test="latestUpdateTime != null and latestUpdateTime !='' ">
+	              latest_update_time = #{latestUpdateTime},
+	          </if>
+    	 </set>
+   where food_id = #{foodId}   
+    </update> 
+ <resultMap id="UserTypeResultMap" type="com.jst.wxdc.bean.UserInfo" >
+    <result column="id" property="id" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="password" property="password" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap> 
+  <select id="selectPassword" parameterType="com.jst.wxdc.bean.UserInfo"  resultMap="UserTypeResultMap" >
+    select 
+    password,id,user_id,user_name
+    from t_user
+    where user_id = #{userId}
+  </select> 
+  <update id="updatePassword" parameterType="com.jst.wxdc.bean.UserInfo" >
+    update t_user set password = #{newPassword} where user_id = #{userId}
+   
+  </update> 
+  
+  <select id="queryTypeId" parameterType="com.jst.wxdc.bean.FoodType"  resultMap="FoodTypeResultMap">
+  	select * from t_food_type
+  </select>
+  
+   <select id="selectAllFoodId" parameterType="com.jst.wxdc.bean.Food"  resultMap="FoodResultMap" >
+    select 
+    food_id,type_id,food_name,pic_path,sale_price,old_price,status,spice_level,mark
+    from t_food
+    where  food_id like CONCAT(#{foodId},'%')
+			
+			
+    order by  food_id  asc
+  </select>
+</mapper>

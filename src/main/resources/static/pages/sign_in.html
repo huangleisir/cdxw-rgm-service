@@ -1,0 +1,325 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>签到</title>
+		<meta name="keywords" content="" />
+		<meta name="description" content="" />
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		
+	</head>
+	<style type="text/css">
+		.sign-content{
+			background:#FFFFFF;
+			min-height:100%;
+		}
+		.sign-top{
+			padding: 31px 120px 27px 120px;
+			border-bottom:1px solid #F4F4F4;
+		}
+		.user-cell{
+			display:inline-block;
+			margin-right:40px;
+		}
+		.user-tip{
+			color:#3D3D3D;
+			text-size:20px;
+			font-weight: bold;
+		}
+		.btn-cell{
+			position: absolute;
+			right:120px;
+			display:inline-block;
+			padding:6px 14px;
+			background:#73B7FF;
+			border-radius:4px;
+			
+		}
+		.download-btn{
+			color:#FFFFFF;
+			text-size:16px;
+		}
+		.user-num{
+			color:#71B6FF;
+		}
+		.sign-main{
+			margin:0 auto;
+			width:259px;
+			height:480px;
+		}
+		.hand-in{
+			position: absolute;
+			right:120px;
+			color:#71B6FF;
+		}
+		
+		.input-cell{
+/*  			display:flex;
+			justify-content:center; */
+			margin-top:100px;
+		}
+		.in-award{
+			width: 239px;
+            height: 239px;
+            background-color: #FFFFFF;
+            border-radius: 50%;
+            border: 10px solid #E4F3F9;
+			
+		}
+		.award-input{
+			text-align:center;
+			height:40px;
+			width:150px;
+			margin:95px 48px;
+			border:none !important;
+			outline:none !important;
+			caret-color:#4BABFF;
+    		padding: 4px 0px !important;
+    		font-size: 28px !important;
+    		color:#13B662 !important;
+		}
+		input::-webkit-input-placeholder {
+        	color: #DCDCDC;
+        	font-size: 24px;
+     	}
+     	.result-ce{
+/*         	display:flex;
+        	flex-direction:row;
+        	justify-content:center; */
+        	margin-top:35px;     	
+     	}
+     	.result-info{
+     		color: #666666;
+        	font-size: 22px;
+        	margin:0 auto;
+			width:160px;
+      	}
+     	.result-tip{
+     		margin-right:10px;
+     	}
+     	.result-cell{
+/*      	    display:flex;
+			justify-content:center; */
+			margin-top:35px;
+			margin-botton:41px;
+     	}
+     	.success-img{
+     		height:45px;
+     		width:45px;
+     		background:url("../images/icon_chengg.png");
+     	}
+     	.failed-img{
+     		height:45px;
+     		width:45px;
+     		background:url("../images/icon_shibai.png");
+     	}
+     	.failed-tip{
+     		display:flex;
+			flex-direction:row;
+			justify-content: center;	
+     	}
+     	.success-tip{
+			display:flex;
+			flex-direction:row;
+			justify-content: center;
+     	}
+     	.success-name{
+     		color:#13B662;
+     		font-size:18px;
+     		margin: auto 0; 
+     		margin-left:15px;
+     	}
+     	.failed-name{
+     		color:#F7A040;
+     		font-size:18px;   
+     		margin: auto 0;
+     		margin-left:15px;  	
+     	}
+     	.bottom-btn{
+/*      	    display:flex;
+			justify-content:center; */
+			width:145px;
+			margin: 0 auto;
+			margin-top:20px;
+     	}
+     	.green-btn{
+			padding:11px 55px;
+     		background:#13B662;
+     		border-radius:4px;  
+     		color:white;
+     		text-align:center;
+     	}
+     	.grey-btn{
+			padding:11px 55px;
+     		background:#DCDCDC;
+     		border-radius:4px;  
+     		color:white;
+     		text-align:center;
+     	}     	
+     	
+     	.no-find{
+     	    display:flex;
+			flex-direction:row;
+			justify-content: center;
+     		color:#666666;
+     		font-size:22px;	
+     		margin-top:20px;	
+     	}
+     	
+     	.reset{
+     	    display:flex;
+			flex-direction:row;
+			justify-content: center;
+     		color:#666666;
+     		font-size:22px;		 
+			margin-top:30px;   	
+     	}
+/*      	.white-cell{
+     		height:45px;
+     	} */
+    </style>
+
+	<body>
+ 	<div class="sign-content" >
+ 		<div class="sign-top">
+ 			<div class="user-cell">
+				<span class="user-tip">总用户：</span>
+				<span class="user-num" id="totalUser"></span> 			
+ 			</div>
+ 			<div class="user-cell">
+				<span class="user-tip">已领取用户：</span>
+				<span class="user-num" id="receiveUser"></span> 			
+ 			</div>
+ 			<div class="btn-cell">
+ 				<div class="download-btn" id="download">导出Excel</div>
+ 			</div>	
+ 		</div>
+ 		<div class="sign-main">
+ 			<!-- <div class="hand-in">手动输入</div> -->
+ 			<div class="input-cell">
+ 			 	<div class="in-award">
+ 					<input class="award-input" maxlength="8" type="text" name="handGiftCode" id="handGiftCode" placeholder="输入领奖码" />
+ 				</div>
+ 			</div>
+ 			<div class="result-ce">
+	 			<div class="result-info" id="result_info">
+					<div class="work-cell">
+						<span class="result-tip">工号：</span>
+						<span class="work-num" id="jobNum"></span>
+					</div>
+					<div class="name-cell">
+						<span class="result-tip" >姓名：</span>
+						<span class="name-num"id="name"></span>
+					</div> 	
+					<div class="name-cell" id="status_cell">
+						<span class="result-tip" >状态：</span>
+						<span class="name-num"id="status"></span>
+					</div> 	
+				</div>	
+			</div>
+			<div class="no-find" id="noFound">
+				<div class="failed-img"></div>
+				<span class="failed-name">未查到此礼品码！</span>
+			</div>
+			<div class="reset" id="reget">
+				<div class="failed-img"></div>
+				<span class="failed-name">请勿重复领取！</span>
+			</div>
+			<div class="result-cell">
+				<div class="success-tip" id="successTip">
+					<div class="success-img"></div>
+					<span class="success-name">领取成功！</span>
+				</div>
+				<div class="failed-tip" id="failedTip">
+					<div class="failed-img"></div>
+					<span class="failed-name">领取失败！</span>
+				</div>				
+			</div>
+			<!-- <div class="white-cell" id="white_cell"></div> -->
+			
+		</div>
+		
+		<div class="bottom-btn">
+			<div class="green-btn" id="greenBtn">确认</div>
+			<div class="grey-btn" id="greyBtn">确认</div>
+		</div>	
+ 	</div>
+<!-- 		<div class="sign-bottom">
+			<div class="sign-user">
+
+			</div>
+			<div>
+				<input class="second-input" maxlength="4" type="text" name="user_search" id="giftCode" placeholder="请使用扫码枪扫描二维码" />
+				<button class="second-btn"  >切换成手动输入</button>
+				 <button class="second-btn" id="submit" >模拟查询</button>
+				<button class="second-btn" id="receive" >模拟领取</button> 
+			</div>
+			<div class="third-cell" id="info" style="display:none">
+			
+				<div class="third-info">
+					<span class="third-span">工号：</span>
+					<span class="third-span" id="jobNum"></span>
+				</div>
+				<div class="third-info">
+					<span class="third-span">用户：</span>
+					<span class="third-span"id="name"></span>
+				</div>
+				<div class="third-info">
+					<span class="third-span">状态：</span>
+					<span class="third-span"id="status"></span>
+				</div>	
+														
+			</div>
+			 <div style="display:none">
+			 	<button class="last-btn" id="query">确认领取</button>
+			 </div>
+		</div> -->
+	</div>
+<!-- 	<div style="background-color:#E0E0E0;height:40px;">
+	<div style="text-align:center">
+				<span >总用户:</span>
+				<span  style="margin-left:40px;" id="totalUser"></span>
+				<span style="margin-left:60px;">已领取用户:</span>
+				<span  style="margin-left:40px;" id="receiveUser"></span>
+				<button  style="margin-left:60px;"id="download" >导出Excel</button>
+				
+	</div>
+
+	</div>
+	<div style="background-color:#FCFCFC;height:669px;">
+	<div style="text-align:center">
+				<input style="width:200px;" maxlength="10" type="text" name="giftCode" id="giftCode" placeholder="请使用扫码枪扫描二维码" />
+				<input style="width:200px;display:none" maxlength="10" type="text" name="handGiftCode" id="handGiftCode" placeholder="请输入二维码" />
+				<button  style="margin-left:60px;"id="input" >切换成手动输入</button>
+				<button  style="margin-left:60px;display:none"id="auto_input" >切换成扫码输入</button>
+	</div>
+
+			<div  id="info" style="display:none">
+			
+				<div style="margin-left:560px;">
+					<span >工号：</span>
+					<span  id="jobNum"></span>
+				</div>
+				<div style="margin-left:560px;">
+					<span >用户：</span>
+					<span id="name"></span>
+				</div>
+				<div >
+					<span style="margin-left:560px;">状态：</span>
+					<span id="status"></span>
+				</div>	
+				<div id="re_btn" style="display:none">
+				<button  style="margin-left:560px;"id="receive" >模拟领取</button> 
+				</div>									
+			</div>
+	</div> -->
+
+
+
+	<script src="../js/jquery-2.0.3.min.js"></script>
+	<!--加载框 -->
+	<script src="../js/load.js"></script>
+	<script src="../js/activity/sign_in.js"></script>
+	</body>
+</html>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="Menu">  
+
+ <resultMap id="MenuResultMap" type="com.jst.wxdc.bean.Menu" >
+    <result column="menu_id" property="menuId" jdbcType="INTEGER" />
+    <result column="menu_name" property="menuName" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="parent_id" property="parentId" jdbcType="VARCHAR" />
+    <result column="open" property="open" jdbcType="VARCHAR" />
+    <result column="position" property="position" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+ </resultMap>
+ 
+  <resultMap id="MenuTreeResultMap" type="com.jst.wxdc.bean.MenuTree" >
+    <result column="menu_id" property="id" jdbcType="INTEGER" />
+    <result column="menu_name" property="name" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="parent_id" property="pId" jdbcType="VARCHAR" />
+    <result column="open" property="open" jdbcType="VARCHAR" />
+    <result column="position" property="position" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+ </resultMap>
+ 
+ <resultMap id="MenuCtrlResultMap" type="com.jst.wxdc.bean.MenuCtrl" >
+    <result column="ctrl_id" property="ctrlId" jdbcType="INTEGER" />
+    <result column="menu_id" property="menuId" jdbcType="VARCHAR" />
+    <result column="id" property="id" jdbcType="VARCHAR" />
+    <result column="creater" property="creater" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="updater" property="updater" jdbcType="VARCHAR" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+ </resultMap>
+  
+  <sql id="Menu_Column_List" >
+     menu_id,menu_name,url,parent_id,open,position,create_time
+  </sql>
+   <sql id="MenuTree_Column_List" >
+     menu_id,menu_name,url,parent_id,open,position,create_time
+  </sql>
+  <sql id="MenuCtrl_Column_List" >
+     ctrl_id,menu_id,id,creater,create_time,updater,update_time
+  </sql>
+  
+  <!-- 查询菜单列表 -->
+  <select id="selectMenuList" parameterType="com.jst.wxdc.bean.Menu" resultMap="MenuResultMap" >
+    select
+    <include refid="Menu_Column_List" /> 
+    from t_menu
+    <trim prefix="WHERE" prefixOverrides="AND|OR">
+		<if test="menuId != null and menuId != ''">
+			AND menu_id = #{menuId,jdbcType=INTEGER}
+		</if>
+	</trim>
+  </select>
+  
+   <!-- 查询菜单树 -->
+  <select id="selectMenuTreeList" parameterType="com.jst.wxdc.bean.Menu" resultMap="MenuTreeResultMap" >
+    select
+    <include refid="MenuTree_Column_List" /> 
+    from t_menu
+    <trim prefix="WHERE" prefixOverrides="AND|OR">
+		<if test="menuId != null and menuId != ''">
+			AND menu_id = #{menuId,jdbcType=INTEGER}
+		</if>
+	</trim>
+  </select>
+  
+   <!-- 查询用户关联菜单列表 -->
+  <select id="selectMenuCtrlList" parameterType="com.jst.wxdc.bean.MenuCtrl" resultMap="MenuCtrlResultMap" >
+    select 
+    <include refid="MenuCtrl_Column_List" /> 
+    from t_menu_ctrl
+    <trim prefix="WHERE" prefixOverrides="AND|OR">
+		<if test="id != null and id != ''">
+			AND id = #{id,jdbcType=VARCHAR}
+		</if>
+	</trim>
+  </select>
+  
+  <!-- 删除指定用户菜单 -->
+  <delete id="deleteUserMenuCtrl" parameterType="com.jst.wxdc.bean.MenuCtrl">
+  	delete from t_menu_ctrl where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <!-- 插入用户菜单 -->
+  <insert id="addUserMenuCtrl" parameterType="com.jst.wxdc.bean.MenuCtrl">
+  	insert t_menu_ctrl
+  	<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="menuId != null and menuId != ''">
+				menu_id,
+			</if>
+			<if test="id != null and id != ''">
+				id,
+			</if>
+			<if test="creater != null and creater != ''">
+				creater,
+			</if>
+			<if test="createTime != null and createTime != ''">
+				create_time,
+			</if>
+			<if test="updater != null and updater != ''">
+				updater,
+			</if>
+			<if test="updateTime != null and updateTime != ''">
+				update_time,
+			</if>
+	</trim>
+	<trim prefix="values (" suffix=")" suffixOverrides=",">
+		<if test="menuId != null and menuId != ''">
+			#{menuId,jdbcType=INTEGER},
+		</if>
+		<if test="id != null and id != ''">
+			#{id,jdbcType=VARCHAR},
+		</if>
+		<if test="creater != null and creater != ''">
+			#{creater,jdbcType=VARCHAR},
+		</if>
+		<if test="createTime != null and createTime != ''">
+			#{createTime,jdbcType=TIMESTAMP},
+		</if>
+		<if test="updater != null and updater != ''">
+			#{updater,jdbcType=VARCHAR},
+		</if>
+		<if test="updateTime != null and updateTime != ''">
+			#{updateTime,jdbcType=TIMESTAMP},
+		</if>
+	</trim>
+  </insert>
+  
+  <!-- 查询用户菜单列表  -->
+  <select id="selectUserMenuList" parameterType="com.jst.wxdc.bean.MenuCtrl" resultMap="MenuResultMap">
+  		select 
+		    m.menu_id,m.menu_name,m.url,m.parent_id,m.open,m.position,m.create_time
+  		from t_menu_ctrl c left join t_menu m on c.menu_id = m.menu_id
+  		where c.id = #{id,jdbcType=INTEGER}
+  </select>
+</mapper>
